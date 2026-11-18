@@ -1,0 +1,16 @@
+/* Solo para la página que compara los tres planes */
+.comparar { padding: clamp(2.5rem, 7vw, 6rem) var(--margen); }
+.comparar > * { max-width: var(--max); margin-inline: auto; }
+.comparar h1 { font-size: clamp(2.5rem, 7vw, 5.5rem); }
+.comparar-intro { margin-block: 1.25rem clamp(2rem, 5vw, 3.5rem); font-size: 1.3rem; line-height: 1.4; }
+.comparar-planes { list-style: none; padding: 0; display: grid; gap: 1.25rem; align-items: start; }
+@media (min-width: 60rem) { .comparar-planes { grid-template-columns: repeat(2, 1fr); } }
+.comparar-plan { display: flex; flex-direction: column; gap: 1rem; height: 100%; padding: 1.75rem; background: var(--papel); }
+.comparar-plan h2 { font-size: clamp(1.75rem, 3vw, 2.5rem); }
+.comparar-plan h3 { font: 700 1.05rem var(--texto); }
+.mensaje { margin: 0; padding: 0.9rem 1.1rem; background: var(--harina-oscura); white-space: pre-line; line-height: 1.4; }
+.falta { font-weight: 700; color: var(--acento); }
+.comparar-plan ul { margin: 0; padding-left: 1.2rem; }
+.comparar-plan .btn { margin-top: auto; }
+.comparar-precio { font: 400 clamp(1.75rem, 4vw, 2.75rem)/1 var(--rotulo); color: var(--acento); }
+.comparar-nota { margin-top: 2rem; font-weight: 600; }

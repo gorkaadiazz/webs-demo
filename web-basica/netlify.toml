@@ -1,0 +1,20 @@
+# Configuración de Netlify. La carpeta del proyecto ya es la web: no hay paso de compilación.
+[build]
+  publish = "."
+
+# Cabeceras de seguridad para todas las páginas.
+# Si añades un servicio externo (formulario, mapa, analítica), amplía Content-Security-Policy.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; img-src 'self' data:; style-src 'self'; font-src 'self'; script-src 'self'; frame-src https://www.openstreetmap.org; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    X-Frame-Options = "DENY"
+
+# Las fuentes no cambian: que el navegador las guarde un año.
+[[headers]]
+  for = "/fonts/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

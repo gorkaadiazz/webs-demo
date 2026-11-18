@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gorkaadiazz.github.io/webs-demo/web-completa/sitemap.xml

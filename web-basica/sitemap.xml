@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Solo páginas que deben salir en Google. Las legales llevan noindex y no se incluyen. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://gorkaadiazz.github.io/webs-demo/web-basica/</loc>
+    <lastmod>2026-11-02</lastmod>
+  </url>
+  <url>
+    <loc>https://gorkaadiazz.github.io/webs-demo/web-basica/el-pan.html</loc>
+    <lastmod>2026-11-02</lastmod>
+  </url>
+  <url>
+    <loc>https://gorkaadiazz.github.io/webs-demo/web-basica/nosotros.html</loc>
+    <lastmod>2026-11-02</lastmod>
+  </url>
+  <url>
+    <loc>https://gorkaadiazz.github.io/webs-demo/web-basica/contacto.html</loc>
+    <lastmod>2026-11-02</lastmod>
+  </url>
+</urlset>

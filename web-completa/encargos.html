@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Encarga tu pan · Panadería Arrieta, Getxo</title>
+  <meta name="description" content="Encarga pan, bollería o tartas en la Panadería Arrieta y recógelo en Getxo. Pedido por WhatsApp en un minuto.">
+  <link rel="canonical" href="https://gorkaadiazz.github.io/webs-demo/web-completa/encargos.html">
+  <meta name="theme-color" content="#2b1d14">
+
+  <!-- Open Graph: cómo se ve el enlace al compartirlo en WhatsApp o redes -->
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_ES">
+  <meta property="og:site_name" content="Panadería Arrieta">
+  <meta property="og:title" content="Encarga tu pan · Panadería Arrieta, Getxo">
+  <meta property="og:description" content="Encarga pan, bollería o tartas en la Panadería Arrieta y recógelo en Getxo. Pedido por WhatsApp en un minuto.">
+  <meta property="og:url" content="https://gorkaadiazz.github.io/webs-demo/web-completa/encargos.html">
+  <meta property="og:image" content="https://gorkaadiazz.github.io/webs-demo/web-completa/img/og.png">
+
+  <link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+  <link rel="preload" href="fonts/dela-gothic-one-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="fonts/atkinson-next-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <script src="js/animaciones.js"></script>
+  <link rel="stylesheet" href="css/styles.css">
+  <script src="js/avisos.js"></script>
+  <script src="js/catalogo.js" defer></script>
+  <script src="js/encargo.js" defer></script>
+  <script src="js/consentimiento.js" defer></script>
+</head>
+<body>
+
+  <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+  <header class="top">
+    <a class="logo" href="index.html">Arrieta</a>
+    <nav class="nav-main" aria-label="Principal">
+      <a href="index.html">Inicio</a>
+      <a href="el-pan.html">El pan</a>
+      <a href="encargos.html" aria-current="page">Encargos</a>
+      <a href="reservas.html">Reservas</a>
+      <a href="galeria.html">Galería</a>
+      <a href="blog/">Blog</a>
+      <a href="nosotros.html">Nosotros</a>
+      <a href="contacto.html">Contacto</a>
+    </nav>
+    <a class="nav-cta" href="encargos.html">Haz tu encargo</a>
+  </header>
+
+  <main id="contenido">
+    <section class="page-hero">
+      <figure class="hero-foto"><img src="img/bolleria-960.webp" width="960" height="541" fetchpriority="high" alt="Cesta de croissants y panecillos sobre un paño rojo."></figure>
+      <div class="tique-hero tique-interior">
+        <div class="tique-papel perforado">
+          <div class="tique-cuerpo">
+      <h1>Haz tu encargo</h1>
+      <p class="lead">Elige, mira el total y dinos cuándo lo recoges. El pedido se abre en WhatsApp para que lo envíes y te lo confirmemos.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-alt">
+      <div class="encargo-grid">
+      <noscript><p class="aviso-sin-js">Este formulario necesita JavaScript. También puedes <a href="https://wa.me/34600000000?text=Hola%2C%20quiero%20hacer%20un%20encargo">escribirnos por WhatsApp</a> o llamar al <a href="tel:+34944000000">944 00 00 00</a>.</p></noscript>
+      <form class="order" id="form-encargo" action="https://wa.me/34600000000" method="get" novalidate>
+        <div class="field">
+          <label for="recogida">Día de recogida</label>
+          <span class="hint" id="recogida-hint">Elígelo primero: te avisamos de lo que no haya ese día. Los lunes cerramos.</span>
+          <input id="recogida" name="recogida" type="date" required aria-describedby="recogida-hint recogida-error">
+          <p class="error" id="recogida-error" aria-live="polite"></p>
+        </div>
+        <fieldset class="carta" data-carta hidden>
+          <legend>Elige lo que quieres</legend>
+          <p class="error" id="carta-error" aria-live="polite"></p>
+          <p class="carta-total" data-carta-total role="status"></p>
+        </fieldset>
+        <div class="field">
+          <label for="pedido">¿Algo más?</label>
+          <span class="hint" id="pedido-hint">Si prefieres, escríbelo con tus palabras.</span>
+          <textarea id="pedido" name="pedido" required aria-describedby="pedido-hint"></textarea>
+        </div>
+        <div class="field">
+          <label for="nombre">Nombre</label>
+          <input id="nombre" name="nombre" type="text" autocomplete="name" required aria-describedby="nombre-error">
+          <p class="error" id="nombre-error" aria-live="polite"></p>
+        </div>
+        <div class="field">
+          <label for="notas">Notas (opcional)</label>
+          <span class="hint" id="notas-hint">Alergias, rebanado, hora aproximada…</span>
+          <textarea id="notas" name="notas" aria-describedby="notas-hint"></textarea>
+        </div>
+        <button class="btn" type="submit">Preparar pedido en WhatsApp</button>
+        <p class="form-status" role="status"></p>
+        <a class="flecha" data-recordatorio download="recoger-encargo.ics" hidden>Añadir la recogida a mi calendario</a>
+        <p class="hint">No guardamos tus datos en esta web: solo viajan en el mensaje que tú envías. ¿Prefieres llamar? <a href="tel:+34944000000">944 00 00 00</a></p>
+      </form>
+      <div class="impresion" id="tique" aria-hidden="true">
+        <div class="impreso perforado">
+          <p class="impreso-cab">Tu encargo</p>
+          <ul class="impreso-lineas" data-impreso-lineas></ul>
+          <p class="impreso-total" data-impreso-total hidden><span>Total aproximado</span><b></b></p>
+          <div class="impreso-fila" data-impreso="pedido"><div><span>Además</span><p></p></div></div>
+          <div class="impreso-fila" data-impreso="recogida"><div><span>Recogida</span><p></p></div></div>
+          <div class="impreso-fila" data-impreso="nombre"><div><span>A nombre de</span><p></p></div></div>
+          <div class="impreso-fila" data-impreso="notas"><div><span>Notas</span><p></p></div></div>
+          <p class="impreso-vacio">Aquí se imprime tu encargo mientras escribes.</p>
+        </div>
+      </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot foot-full">
+    <div class="foot-grid">
+      <div>
+        <p class="foot-logo">Arrieta</p>
+        <p>Calle Mayor, 14<br>48991 Getxo, Bizkaia</p>
+      </div>
+      <div>
+        <h2>Horario</h2>
+        <p>Martes a viernes: 7:30 – 14:00 y 17:00 – 20:00<br>Sábado: 8:00 – 14:30<br>Domingo: 8:00 – 13:30<br>Lunes cerrado</p>
+      </div>
+      <div>
+        <h2>Contacto</h2>
+        <p><a href="tel:+34944000000">944 00 00 00</a><br><a href="mailto:hola@panaderiaarrieta.example">hola@panaderiaarrieta.example</a><br><a href="https://wa.me/34600000000?text=Hola%2C%20quiero%20hacer%20un%20encargo" target="_blank" rel="noopener">WhatsApp</a><br><a href="preguntas.html">Preguntas frecuentes</a><br><a href="empresas.html">Para empresas</a><br><a href="panaderia-cerca-metro-algorta.html">Cerca del metro de Algorta</a></p>
+      </div>
+      <div>
+        <h2>Síguenos</h2>
+        <!-- Demo: sustituir por los perfiles reales del cliente -->
+        <p><a href="https://www.instagram.com/" target="_blank" rel="noopener">Instagram</a><br><a href="https://www.facebook.com/" target="_blank" rel="noopener">Facebook</a></p>
+      </div>
+    </div>
+    <p class="foot-legal">© 2026 Panadería Arrieta · <a href="aviso-legal.html">Aviso legal</a> · <a href="privacidad.html">Privacidad</a> · <a href="cookies.html">Cookies</a> · <button class="link-button" type="button" data-open-consent>Configurar cookies</button></p>
+    <p class="foot-demo">Web de demostración: el negocio es ficticio y las fotos son de banco de imágenes.</p>
+  </footer>
+
+  <div class="resumen-movil" data-resumen hidden>
+    <span data-resumen-texto role="status"></span>
+    <a href="#tique">Ver mi tique</a>
+  </div>
+
+  <div class="consent" id="consent" role="region" aria-label="Aviso de cookies" hidden>
+    <p>Usamos analítica para saber qué páginas se visitan y mejorar la web. Solo se activa si aceptas. <a href="cookies.html">Más información</a></p>
+    <div class="consent-actions">
+      <button class="btn" type="button" data-consent="rechazar">Rechazar</button>
+      <button class="btn" type="button" data-consent="aceptar">Aceptar</button>
+    </div>
+  </div>
+
+</body>
+</html>
