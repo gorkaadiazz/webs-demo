@@ -683,3 +683,10 @@ body { overflow-x: clip; }
 /* El correo es una palabra muy larga: que pueda partirse y no ensanche la columna */
 .visit-grid > * { min-width: 0; }
 .visit a, .foot a { overflow-wrap: anywhere; }
+
+/* Pantallas medianas: el menú no parte los enlaces en dos líneas */
+.top .nav-main a { white-space: nowrap; }
+@media (min-width: 60rem) and (max-width: 80rem) {
+  .top nav.nav-main { gap: 1rem; }
+  .top .nav-main a { font-size: 1rem; }
+}
