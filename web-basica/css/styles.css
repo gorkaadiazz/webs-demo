@@ -1,0 +1,331 @@
+/* Panadería Arrieta. Mundo visual: el mostrador y su máquina de turnos.
+   Fuentes alojadas en /fonts (subconjunto latino, licencia SIL OFL). */
+@font-face { font-family: "Dela Gothic One"; src: url("../fonts/dela-gothic-one-latin.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Atkinson Hyperlegible Next"; src: url("../fonts/atkinson-next-latin.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
+/* Doto dibuja los dos puntos como un adorno confuso: ese signo se toma de la fuente de texto */
+@font-face { font-family: "Doto"; src: url("../fonts/doto-latin.woff2") format("woff2"); font-weight: 800; font-display: swap; unicode-range: U+0-39, U+3B-FFFF; }
+
+:root {
+  /* Papel de rollo, con los colores de harina y corteza de la panadería */
+  --harina: #f6efe3;
+  --harina-oscura: #ebe0cc;
+  --papel: #fffaf2;
+  /* Tinta, acentos y tablero de horario */
+  --tinta: #2b1d14;
+  --corteza: #a8571f;
+  --acento: #9e3b12;
+  --led: #ffa94d;
+
+  --rotulo: "Dela Gothic One", "Arial Black", sans-serif;
+  --texto: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --matriz: "Doto", "Atkinson Hyperlegible Next", ui-monospace, monospace;
+
+  --margen: clamp(1rem, 4.5vw, 4.5rem);
+  --max: 84rem;
+  --barra: 4rem;
+  --salida: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--barra) + 1rem); scrollbar-color: var(--corteza) var(--harina-oscura); accent-color: var(--acento); caret-color: var(--acento); }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body { margin: 0; background: var(--harina); color: var(--tinta); font: 400 1.125rem/1.55 var(--texto); -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { margin: 0; font-family: var(--rotulo); font-weight: 400; line-height: 1.04; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 2px; }
+address { font-style: normal; }
+::selection { background: var(--corteza); color: var(--harina); }
+:focus-visible { outline: 3px solid var(--tinta); outline-offset: 3px; }
+.skip-link { position: absolute; left: 1rem; top: -5rem; z-index: 50; background: var(--harina-oscura); color: var(--tinta); padding: 0.75rem 1rem; font-weight: 700; }
+.skip-link:focus { top: 0.5rem; }
+
+/* Bordes perforados del papel de rollo */
+.perforado {
+  --r: 0.5rem;
+  -webkit-mask: radial-gradient(var(--r) at 0 50%, #0000 97%, #000) left / 51% calc(var(--r) * 3) repeat-y,
+                radial-gradient(var(--r) at 100% 50%, #0000 97%, #000) right / 51% calc(var(--r) * 3) repeat-y;
+  mask: radial-gradient(var(--r) at 0 50%, #0000 97%, #000) left / 51% calc(var(--r) * 3) repeat-y,
+        radial-gradient(var(--r) at 100% 50%, #0000 97%, #000) right / 51% calc(var(--r) * 3) repeat-y;
+}
+
+/* La barra es la máquina de turnos: de aquí sale el tique */
+.top {
+  position: sticky; top: 0; z-index: 20; min-height: var(--barra);
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 0.5rem var(--margen); background: var(--tinta); color: var(--papel);
+}
+.logo { font: 400 1.5rem var(--rotulo); color: var(--harina-oscura); text-decoration: none; }
+.top nav { display: flex; align-items: center; gap: clamp(1rem, 2.5vw, 2.25rem); }
+.top a:not(.logo, .nav-cta) { color: var(--papel); font-weight: 600; text-decoration: none; padding-block: 0.5rem; }
+.nav-cta { background: var(--harina-oscura); color: var(--tinta); font-weight: 700; text-decoration: none; padding: 0.55rem 1.1rem; white-space: nowrap; }
+.top :focus-visible { outline-color: var(--harina-oscura); }
+@media (hover: hover) and (pointer: fine) {
+  .top a:not(.logo, .nav-cta):hover { color: var(--harina-oscura); }
+  .nav-cta:hover { background: var(--papel); }
+}
+@media (max-width: 40rem) { .top nav a:not(.nav-cta) { display: none; } }
+
+/* Botones con forma de resguardo: dos muescas a los lados */
+.btn {
+  --m: 0.5rem;
+  display: inline-flex; align-items: center; justify-content: center; min-height: 3.5rem;
+  padding: 0.85rem 1.9rem; border: 0; font: 700 1.125rem/1.2 var(--texto); text-align: center; text-decoration: none; cursor: pointer;
+  background: var(--fondo-btn, var(--acento)); color: var(--color-btn, var(--harina));
+  -webkit-mask: radial-gradient(var(--m) at 0 50%, #0000 97%, #000) left / 51% 100% no-repeat, radial-gradient(var(--m) at 100% 50%, #0000 97%, #000) right / 51% 100% no-repeat;
+  mask: radial-gradient(var(--m) at 0 50%, #0000 97%, #000) left / 51% 100% no-repeat, radial-gradient(var(--m) at 100% 50%, #0000 97%, #000) right / 51% 100% no-repeat;
+  transition: transform 220ms var(--salida), background-color 160ms ease, color 160ms ease;
+}
+.btn:focus-visible { -webkit-mask: none; mask: none; }
+.btn:active { transform: translateY(2px); }
+.btn-papel { --fondo-btn: var(--papel); --color-btn: var(--tinta); }
+.btn-claro { --fondo-btn: var(--harina-oscura); --color-btn: var(--tinta); }
+@media (hover: hover) and (pointer: fine) { .btn:hover { transform: translateY(-3px); } }
+
+/* Enlace con flecha dibujada */
+.flecha { display: inline-flex; align-items: center; gap: 0.5em; font-weight: 700; }
+.flecha::after {
+  content: ""; width: 1.1em; height: 0.8em; background: currentColor; flex: none; transition: transform 220ms var(--salida);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 16'%3E%3Cpath d='M13 0l9 8-9 8-2-2.2L16 9.500H0v-3h16L11 2.200z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 16'%3E%3Cpath d='M13 0l9 8-9 8-2-2.2L16 9.500H0v-3h16L11 2.200z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+@media (hover: hover) and (pointer: fine) { .flecha:hover::after { transform: translateX(4px); } }
+
+/* ---------- Portada ---------- */
+.hero { position: relative; overflow: clip; display: flex; flex-direction: column; min-height: calc(100svh - var(--barra)); background: var(--harina); }
+/* En móvil la foto solo ocupa la parte baja, para que no se amplíe demasiado */
+.hero-foto { position: absolute; inset: auto 0 0; height: 62%; margin: 0; }
+.hero-foto img { width: 100%; height: 100%; object-fit: cover; object-position: 32% 50%; }
+
+.tique-hero { position: relative; z-index: 2; align-self: flex-start; width: calc(100% - 2 * var(--margen)); margin-inline: var(--margen); filter: drop-shadow(0 18px 22px rgb(43 29 20 / 0.38)); }
+.tique-papel { background: var(--harina-oscura); container-type: inline-size; padding-top: 0.25rem; }
+.tique-cuerpo { padding: clamp(1rem, 4cqi, 2.25rem) clamp(1.5rem, 6cqi, 3rem) clamp(1.1rem, 4cqi, 2rem); }
+.tique-hero h1 { font-size: 9.6cqi; line-height: 1.02; }
+.tique-hero h1 .linea { display: block; }
+.tique-hero h1 .cifra { color: var(--acento); display: flex; align-items: baseline; gap: 0.12em; font-size: 11cqi; line-height: 1; margin-block: 0.04em; }
+.tique-hero h1 .cifra b { font-weight: 400; font-size: 29cqi; letter-spacing: -0.04em; line-height: 0.92; }
+.lead { margin-top: 0.9rem; font-size: clamp(1.05rem, 3.1cqi, 1.3rem); line-height: 1.4; max-width: 34em; }
+.resguardo { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem; padding: clamp(1rem, 3.4cqi, 1.5rem) clamp(1.5rem, 6cqi, 3rem); border-top: 3px dashed var(--tinta); }
+.resguardo .btn { flex: 1 1 15rem; max-width: 26rem; }
+.resguardo .flecha { padding-block: 0.5rem; }
+
+@media (min-width: 60rem) {
+  .hero-foto { inset: 0 0 0 30%; height: auto; }
+  /* Foto en espejo: así el panadero queda a la vista, mirando hacia el tique */
+  .hero-foto { transform: scaleX(-1); }
+  .hero-foto img { object-position: 50% 40%; }
+  .tique-hero { width: min(47rem, 54vw); }
+}
+@media (min-width: 60rem) and (max-height: 50rem) {
+  .tique-hero { width: min(40rem, 48vw); }
+}
+
+/* El tique sale de la máquina al cargar */
+@media (prefers-reduced-motion: no-preference) {
+  .tique-hero { animation: sale-tique 1100ms var(--salida) 120ms both; }
+  .hero-foto img { animation: asienta-foto 1500ms var(--salida) both; }
+  @keyframes sale-tique { from { transform: translateY(-104%); } }
+  @keyframes asienta-foto { from { transform: scale(1.06); } }
+}
+
+/* ---------- Secciones ---------- */
+/* Costura perforada: cada banda solapa un poco la anterior y sus agujeros la dejan ver */
+main > section + section, main > .marquee + section, .foot {
+  --c: 0.5rem;
+  position: relative; margin-top: calc(var(--c) * -1);
+  -webkit-mask: radial-gradient(var(--c) at 50% 0, #0000 97%, #000) top / calc(var(--c) * 3) var(--c) repeat-x, linear-gradient(#000 0 0) 0 var(--c) / 100% 100% no-repeat;
+  mask: radial-gradient(var(--c) at 50% 0, #0000 97%, #000) top / calc(var(--c) * 3) var(--c) repeat-x, linear-gradient(#000 0 0) 0 var(--c) / 100% 100% no-repeat;
+}
+.foot { padding-top: calc(1.5rem + var(--c)); }
+
+.seccion { padding: clamp(3.5rem, 9vw, 7.5rem) var(--margen); }
+.seccion > * { max-width: var(--max); margin-inline: auto; }
+.titular { font-size: clamp(2.5rem, 7.2vw, 6rem); }
+
+/* Lo que sale del horno: un rollo de tiques */
+.breads { background: var(--harina-oscura); }
+.section-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 1.5rem 3rem; margin-bottom: clamp(2rem, 5vw, 3.5rem); }
+.section-head p { max-width: 40rem; text-wrap: balance; font-size: 1.25rem; line-height: 1.35; font-weight: 600; }
+
+.bread-list { list-style: none; padding: 0; display: grid; gap: 1rem; }
+.bread-list li {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; background: var(--papel);
+  transition: transform 300ms var(--salida);
+}
+.bread-list li > img { grid-column: 1 / -1; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.bread-info { padding: 1.25rem 1.5rem; min-width: 0; }
+.bread-info h3 { font-size: clamp(1.45rem, 3vw, 2.25rem); margin-bottom: 0.5rem; }
+.price {
+  display: flex; flex-direction: column; justify-content: center; align-items: flex-end; gap: 0.1rem; text-align: right;
+  padding: 1rem 1.5rem 1rem 1.1rem; border-left: 3px dashed var(--tinta);
+  font: 400 clamp(1.5rem, 5.2vw, 3.75rem)/1 var(--rotulo); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.price small { font: 700 1rem var(--texto); }
+@media (min-width: 48rem) {
+  .bread-list li:has(> img) { grid-template-columns: clamp(12rem, 24vw, 20rem) minmax(0, 1fr) auto; }
+  .bread-list li > img { grid-column: auto; height: 100%; aspect-ratio: auto; min-height: 11rem; }
+  .bread-list li:has(> img):nth-child(odd) { margin-right: clamp(0rem, 7vw, 7rem); }
+  .bread-list li:has(> img):nth-child(even) { margin-left: clamp(0rem, 7vw, 7rem); }
+  .bread-info { align-self: center; padding: 1.5rem 2rem; }
+  .price { padding-inline: 2rem; }
+}
+@media (hover: hover) and (pointer: fine) { .bread-list li:hover { transform: translateY(-4px) rotate(-0.4deg); } }
+
+@media (max-width: 30rem) {
+  .bread-list li { grid-template-columns: minmax(0, 1fr); }
+  .bread-list .price { flex-direction: row; justify-content: flex-start; align-items: baseline; gap: 0.5rem; padding: 0.7rem 1.5rem; border-left: 0; border-top: 3px dashed var(--tinta); font-size: 2rem; }
+}
+
+/* Nosotros */
+.about { display: grid; background: var(--papel); }
+.about-foto { margin: 0; }
+.about-foto img { width: 100%; height: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+.about-cuerpo { padding: clamp(2.5rem, 6vw, 5.5rem) var(--margen); align-self: center; }
+.about-quote p { color: var(--corteza); font: 400 clamp(1.75rem, 3.6vw, 3.25rem)/1.12 var(--rotulo); }
+.about-quote span { display: block; margin-top: 1rem; font-weight: 700; }
+.about-text { margin-top: clamp(2.5rem, 5vw, 4rem); max-width: 36rem; }
+.about-text h2 { font-size: clamp(1.5rem, 2.6vw, 2.1rem); margin-bottom: 0.9rem; }
+.about-text p + p { margin-top: 0.9rem; }
+@media (min-width: 60rem) { .about { grid-template-columns: 5fr 7fr; } .about-foto img { aspect-ratio: auto; } }
+
+/* Horario: un tablero LED */
+.visit { background: var(--tinta); color: var(--papel); }
+.visit .titular { color: var(--harina-oscura); margin-bottom: clamp(2rem, 5vw, 3.5rem); }
+.visit :focus-visible { outline-color: var(--harina-oscura); }
+.visit-grid { display: grid; gap: clamp(2.5rem, 6vw, 5rem); }
+@media (min-width: 60rem) { .visit-grid { grid-template-columns: 3fr 2fr; } }
+.visit h3 { font-size: 1.35rem; margin-bottom: 1rem; }
+.hours { margin: 0; }
+.hours > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.25rem 1rem; padding: 0.8rem 0.9rem; border-top: 1px solid #4d3b2e; }
+.hours > div:last-child { border-bottom: 1px solid #4d3b2e; }
+.hours dt { font-weight: 700; font-size: 1.15rem; }
+.hours dd { margin: 0; display: grid; justify-items: end; color: var(--led); font: 800 clamp(1.4rem, 3.2vw, 2.2rem)/1.15 var(--matriz); font-variant-numeric: tabular-nums; text-transform: uppercase; text-align: right; }
+.visit address { font: 400 clamp(1.6rem, 3vw, 2.4rem)/1.2 var(--rotulo); margin-bottom: 1.5rem; }
+
+/* Cierre */
+.contact { background: var(--harina); }
+.contact h2 { font-size: clamp(2.6rem, 8.4vw, 7.25rem); line-height: 1; }
+.contact > p { margin-top: 1.5rem; font-size: 1.3rem; line-height: 1.4; }
+.contact > p:not(.contact-mail) { max-width: var(--max); }
+.contact-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
+.contact .contact-mail { margin-top: 1.5rem; font-size: 1.125rem; }
+
+/* Pie */
+.foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem 2rem; padding: 1.5rem var(--margen); background: var(--tinta); color: var(--papel); font-size: 1rem; }
+.foot :focus-visible { outline-color: var(--harina-oscura); }
+.foot-demo { flex-basis: 100%; }
+
+/* Páginas legales y 404: un tique de papel sobre la harina */
+.legal { max-width: 46rem; margin: clamp(1.5rem, 5vw, 4rem) auto; padding: clamp(1.75rem, 5vw, 3.5rem); background: var(--papel); width: calc(100% - 2 * var(--margen)); }
+.legal h1 { font-size: clamp(2rem, 6vw, 3.25rem); margin-bottom: 1.5rem; }
+.legal h2 { font: 700 1.35rem/1.25 var(--texto); margin: 2.25rem 0 0.6rem; }
+.legal p + p { margin-top: 0.75rem; }
+.legal .back { display: inline-block; margin-bottom: 1.75rem; font-weight: 700; }
+
+/* ---------- Web de varias páginas ---------- */
+main > section:not(.hero, .about, .page-hero) { padding: clamp(3.5rem, 9vw, 7.5rem) var(--margen); }
+main > section:not(.hero, .about, .page-hero) > * { max-width: var(--max); margin-inline: auto; }
+.section-head h2 { font-size: clamp(2.5rem, 7.2vw, 6rem); }
+
+.top .nav-main a[aria-current="page"] { color: var(--harina-oscura); text-decoration: underline; text-underline-offset: 0.45em; }
+@media (max-width: 60rem) {
+  /* En móvil el menú baja a varias filas, todo a la vista, y la barra no se queda fija */
+  :root { --barra: 0rem; }
+  .top { position: static; flex-wrap: wrap; }
+  .top .nav-main { order: 3; flex-basis: 100%; flex-wrap: wrap; gap: 0 1.1rem; }
+  .top nav.nav-main a:not(.nav-cta) { display: inline-block; white-space: nowrap; }
+  .hero { min-height: 0; padding-bottom: 14rem; }
+}
+
+/* Cabecera de página interior: el mismo tique sobre una foto, más bajo */
+.page-hero { position: relative; overflow: clip; padding-bottom: 15rem; }
+.page-hero .hero-foto { height: 18rem; }
+.tique-interior h1 { font-size: clamp(2rem, 7.4cqi, 4.5rem); line-height: 1.04; }
+@media (min-width: 60rem) {
+  .page-hero { min-height: 30rem; padding-bottom: 3rem; }
+  .page-hero .hero-foto { inset: 0 0 0 42%; height: auto; transform: none; }
+  .page-hero .hero-foto img { object-position: 50% 50%; }
+  .tique-interior { width: min(46rem, 54vw); }
+}
+.post-meta { margin-top: 0.9rem; font-weight: 700; }
+
+.more { margin-top: 2rem; }
+.more:not(.btn) { display: inline-flex; padding-block: 0.5rem; }
+.flecha-atras { flex-direction: row-reverse; }
+.flecha-atras::after { transform: scaleX(-1); }
+@media (hover: hover) and (pointer: fine) { .flecha-atras:hover::after { transform: translateX(-4px) scaleX(-1); } }
+
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* Colores de rollo por sección */
+.section-alt { background: var(--harina-oscura); }
+.seccion-tinta { background: var(--tinta); color: var(--papel); }
+.seccion-tinta .section-head h2 { color: var(--harina-oscura); }
+.seccion-tinta :focus-visible { outline-color: var(--harina-oscura); }
+
+/* Catálogo */
+.group + .group { margin-top: clamp(3.5rem, 8vw, 6rem); }
+.group > h2 { font-size: clamp(2rem, 5.4vw, 4rem); margin-bottom: 0.6rem; }
+.group > p { max-width: 36rem; margin-bottom: 1.75rem; font-size: 1.2rem; font-weight: 600; line-height: 1.35; }
+.group .bread-list { grid-template-columns: repeat(auto-fit, minmax(min(28rem, 100%), 1fr)); }
+.group .bread-info h3 { font-size: clamp(1.3rem, 2.2vw, 1.7rem); }
+@media (min-width: 48rem) {
+  .group .bread-list li { grid-template-columns: minmax(0, 1fr) 11rem; }
+  .group .price { font-size: clamp(1.2rem, 1.9vw, 1.5rem); padding-inline: 0.75rem; align-items: center; text-align: center; }
+  .group .bread-list li:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+
+/* Banda con texto y foto */
+.con-foto { display: grid; gap: 2rem; align-items: center; }
+.con-foto img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+@media (min-width: 60rem) { .con-foto { grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 5rem); } }
+
+.cabecera-grupo { margin-bottom: 1.75rem; }
+.cabecera-grupo h2 { font-size: clamp(2rem, 5.4vw, 4rem); margin-bottom: 0.6rem; }
+.cabecera-grupo p { font-size: 1.2rem; font-weight: 600; line-height: 1.35; text-wrap: balance; }
+
+/* Texto largo: papel para leer con calma */
+.prose { max-width: 46rem !important; padding: clamp(1.75rem, 5vw, 3.5rem); background: var(--papel); font-size: 1.2rem; line-height: 1.6; }
+.prose p + p, .prose ul + p, .prose p + ul { margin-top: 1.1rem; }
+.prose h2 { font-size: clamp(1.5rem, 3.4vw, 2.25rem); margin: 2.75rem 0 0.9rem; }
+.prose h2:first-child { margin-top: 0; }
+.prose ul { padding-left: 1.25rem; }
+.prose li + li { margin-top: 0.5rem; }
+
+/* Horario y contacto */
+.visit .visit-grid h2 { font-size: clamp(1.6rem, 3vw, 2.25rem); color: var(--harina-oscura); margin-bottom: 1.25rem; }
+.visit .visit-grid h2.sub { margin-top: 2.75rem; }
+.visit .visit-grid p + p { margin-top: 0.5rem; }
+.link-contacto { font-size: 1.3rem; font-weight: 700; }
+
+/* Mapa con consentimiento: no se conecta a OpenStreetMap hasta que se pulsa */
+.map { display: grid; place-items: center; align-content: center; gap: 1.25rem; aspect-ratio: 4 / 3; padding: 1.5rem; text-align: center; background: #3a2a1e; }
+.map p { max-width: 26rem; }
+.map iframe { width: 100%; height: 100%; border: 0; }
+.map.is-loaded { padding: 0; }
+.map-links { margin-top: 0.75rem; }
+.map-links a { padding-block: 0.5rem; }
+
+/* Pie completo */
+.foot-full { display: block; padding: clamp(3rem, 7vw, 4.5rem) var(--margen) 1.5rem; }
+.foot-grid { max-width: var(--max); margin: 0 auto; display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr)); }
+.foot-grid h2 { font: 700 1rem var(--texto); color: var(--harina-oscura); margin-bottom: 0.5rem; }
+.foot-logo { font: 400 1.6rem var(--rotulo); color: var(--harina-oscura); margin-bottom: 0.5rem; }
+.foot-full p { line-height: 1.75; }
+.foot-legal, .foot-full .foot-demo { max-width: var(--max); margin-inline: auto; }
+.foot-legal { margin-top: 2.5rem; padding-top: 1.25rem; border-top: 1px solid #4d3b2e; }
+.foot-full .foot-demo { margin-top: 0.25rem; }
+
+/* Nada se sale de lado: ni la foto mientras se asienta al cargar */
+body { overflow-x: clip; }
+
+/* Móviles muy estrechos: el horario pasa a una columna para que quepa */
+@media (max-width: 22.5rem) {
+  .hours > div { grid-template-columns: minmax(0, 1fr); }
+  .hours dd { justify-items: start; text-align: left; }
+}
+
+/* El correo es una palabra muy larga: que pueda partirse y no ensanche la columna */
+.visit-grid > * { min-width: 0; }
+.visit a, .foot a { overflow-wrap: anywhere; }
