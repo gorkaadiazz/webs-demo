@@ -1,0 +1,685 @@
+/* Panadería Arrieta. Mundo visual: el mostrador y su máquina de turnos.
+   Fuentes alojadas en /fonts (subconjunto latino, licencia SIL OFL). */
+@font-face { font-family: "Dela Gothic One"; src: url("../fonts/dela-gothic-one-latin.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Atkinson Hyperlegible Next"; src: url("../fonts/atkinson-next-latin.woff2") format("woff2"); font-weight: 400 700; font-display: swap; }
+/* Doto dibuja los dos puntos como un adorno confuso: ese signo se toma de la fuente de texto */
+@font-face { font-family: "Doto"; src: url("../fonts/doto-latin.woff2") format("woff2"); font-weight: 800; font-display: swap; unicode-range: U+0-39, U+3B-FFFF; }
+
+:root {
+  /* Papel de rollo, con los colores de harina y corteza de la panadería */
+  --harina: #f6efe3;
+  --harina-oscura: #ebe0cc;
+  --papel: #fffaf2;
+  /* Tinta, acentos y marcador */
+  --tinta: #2b1d14;
+  --corteza: #a8571f;
+  --acento: #9e3b12;
+  --led: #ffa94d;
+
+  --rotulo: "Dela Gothic One", "Arial Black", sans-serif;
+  --texto: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+  --matriz: "Doto", "Atkinson Hyperlegible Next", ui-monospace, monospace;
+
+  --margen: clamp(1rem, 4.5vw, 4.5rem);
+  --max: 84rem;
+  --barra: 4rem;
+  --salida: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(var(--barra) + 1rem); scrollbar-color: var(--corteza) var(--harina-oscura); accent-color: var(--acento); caret-color: var(--acento); }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body { margin: 0; background: var(--harina); color: var(--tinta); font: 400 1.125rem/1.55 var(--texto); -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { margin: 0; font-family: var(--rotulo); font-weight: 400; line-height: 1.04; text-wrap: balance; }
+p { margin: 0; text-wrap: pretty; }
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; text-underline-offset: 0.2em; text-decoration-thickness: 2px; }
+address { font-style: normal; }
+::selection { background: var(--corteza); color: var(--harina); }
+:focus-visible { outline: 3px solid var(--tinta); outline-offset: 3px; }
+.skip-link { position: absolute; left: 1rem; top: -5rem; z-index: 50; background: var(--harina-oscura); color: var(--tinta); padding: 0.75rem 1rem; font-weight: 700; }
+.skip-link:focus { top: 0.5rem; }
+
+/* Bordes perforados del papel de rollo */
+.perforado {
+  --r: 0.5rem;
+  -webkit-mask: radial-gradient(var(--r) at 0 50%, #0000 97%, #000) left / 51% calc(var(--r) * 3) repeat-y,
+                radial-gradient(var(--r) at 100% 50%, #0000 97%, #000) right / 51% calc(var(--r) * 3) repeat-y;
+  mask: radial-gradient(var(--r) at 0 50%, #0000 97%, #000) left / 51% calc(var(--r) * 3) repeat-y,
+        radial-gradient(var(--r) at 100% 50%, #0000 97%, #000) right / 51% calc(var(--r) * 3) repeat-y;
+}
+
+/* La barra es la máquina de turnos: de aquí sale el tique */
+.top {
+  position: sticky; top: 0; z-index: 20; min-height: var(--barra);
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 0.5rem var(--margen); background: var(--tinta); color: var(--papel);
+}
+.logo { font: 400 1.5rem var(--rotulo); color: var(--harina-oscura); text-decoration: none; }
+.top nav { display: flex; align-items: center; gap: clamp(1rem, 2.5vw, 2.25rem); }
+.top a:not(.logo, .nav-cta) { color: var(--papel); font-weight: 600; text-decoration: none; padding-block: 0.5rem; }
+.nav-cta { background: var(--harina-oscura); color: var(--tinta); font-weight: 700; text-decoration: none; padding: 0.55rem 1.1rem; white-space: nowrap; }
+.top :focus-visible { outline-color: var(--harina-oscura); }
+@media (hover: hover) and (pointer: fine) {
+  .top a:not(.logo, .nav-cta):hover { color: var(--harina-oscura); }
+  .nav-cta:hover { background: var(--papel); }
+}
+@media (max-width: 40rem) { .top nav a:not(.nav-cta) { display: none; } }
+
+/* Botones con forma de resguardo: dos muescas a los lados */
+.btn {
+  --m: 0.5rem;
+  display: inline-flex; align-items: center; justify-content: center; min-height: 3.5rem;
+  padding: 0.85rem 1.9rem; border: 0; font: 700 1.125rem/1.2 var(--texto); text-align: center; text-decoration: none; cursor: pointer;
+  background: var(--fondo-btn, var(--acento)); color: var(--color-btn, var(--harina));
+  -webkit-mask: radial-gradient(var(--m) at 0 50%, #0000 97%, #000) left / 51% 100% no-repeat, radial-gradient(var(--m) at 100% 50%, #0000 97%, #000) right / 51% 100% no-repeat;
+  mask: radial-gradient(var(--m) at 0 50%, #0000 97%, #000) left / 51% 100% no-repeat, radial-gradient(var(--m) at 100% 50%, #0000 97%, #000) right / 51% 100% no-repeat;
+  transition: transform 220ms var(--salida), background-color 160ms ease, color 160ms ease;
+}
+.btn:focus-visible { -webkit-mask: none; mask: none; }
+.btn:active { transform: translateY(2px); }
+.btn-papel { --fondo-btn: var(--papel); --color-btn: var(--tinta); }
+.btn-claro { --fondo-btn: var(--harina-oscura); --color-btn: var(--tinta); }
+@media (hover: hover) and (pointer: fine) { .btn:hover { transform: translateY(-3px); } }
+
+/* Enlace con flecha dibujada */
+.flecha { display: inline-flex; align-items: center; gap: 0.5em; font-weight: 700; }
+.flecha::after {
+  content: ""; width: 1.1em; height: 0.8em; background: currentColor; flex: none; transition: transform 220ms var(--salida);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 16'%3E%3Cpath d='M13 0l9 8-9 8-2-2.2L16 9.500H0v-3h16L11 2.200z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 16'%3E%3Cpath d='M13 0l9 8-9 8-2-2.2L16 9.500H0v-3h16L11 2.200z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+@media (hover: hover) and (pointer: fine) { .flecha:hover::after { transform: translateX(4px); } }
+
+/* ---------- Portada ---------- */
+.hero { position: relative; overflow: clip; display: flex; flex-direction: column; min-height: calc(100svh - var(--barra)); background: var(--harina); }
+/* En móvil la foto solo ocupa la parte baja, para que no se amplíe demasiado */
+.hero-foto { position: absolute; inset: auto 0 0; height: 62%; margin: 0; }
+.hero-foto img { width: 100%; height: 100%; object-fit: cover; object-position: 32% 50%; }
+
+.tique-hero { position: relative; z-index: 2; align-self: flex-start; width: calc(100% - 2 * var(--margen)); margin-inline: var(--margen); filter: drop-shadow(0 18px 22px rgb(43 29 20 / 0.38)); }
+.tique-papel { background: var(--harina-oscura); container-type: inline-size; padding-top: 0.25rem; }
+.tique-cuerpo { padding: clamp(1rem, 4cqi, 2.25rem) clamp(1.5rem, 6cqi, 3rem) clamp(1.1rem, 4cqi, 2rem); }
+.tique-hero h1 { font-size: 9.6cqi; line-height: 1.02; }
+.tique-hero h1 .linea { display: block; }
+.tique-hero h1 .cifra { color: var(--acento); display: flex; align-items: baseline; gap: 0.12em; font-size: 11cqi; line-height: 1; margin-block: 0.04em; }
+.tique-hero h1 .cifra b { font-weight: 400; font-size: 29cqi; letter-spacing: -0.04em; line-height: 0.92; }
+.lead { margin-top: 0.9rem; font-size: clamp(1.05rem, 3.1cqi, 1.3rem); line-height: 1.4; max-width: 34em; }
+.resguardo { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1.5rem; padding: clamp(1rem, 3.4cqi, 1.5rem) clamp(1.5rem, 6cqi, 3rem); border-top: 3px dashed var(--tinta); }
+.resguardo .btn { flex: 1 1 15rem; max-width: 26rem; }
+.resguardo .flecha { padding-block: 0.5rem; }
+
+/* Marcador LED: lo único encendido de la página */
+.led {
+  display: inline-grid; gap: 0.1rem; padding: 0.7rem 1.1rem; background: var(--tinta); color: var(--led);
+  font-family: var(--matriz); font-weight: 800; line-height: 1.05; text-transform: uppercase;
+  border-radius: 4px; box-shadow: 0 14px 24px -8px rgb(43 29 20 / 0.6), inset 0 0 0 2px #4d3b2e;
+}
+.led-estado { display: flex; align-items: center; gap: 0.5rem; font-size: clamp(1.9rem, 4.2vw, 3.25rem); text-shadow: 0 0 0.35em rgb(255 169 77 / 0.6); }
+.led-detalle { font-size: clamp(1.25rem, 2.3vw, 1.75rem); }
+.led-luz { width: 0.55em; height: 0.55em; border-radius: 50%; background: var(--led); opacity: 0.35; flex: none; }
+.led.is-abierto .led-luz { opacity: 1; box-shadow: 0 0 0.5em var(--led); animation: latido 2.4s ease-in-out 2; }
+@keyframes latido { 50% { opacity: 0.45; } }
+.hero .led { position: relative; z-index: 3; align-self: flex-end; margin: auto var(--margen) var(--margen); }
+
+@media (min-width: 60rem) {
+  .hero-foto { inset: 0 0 0 30%; height: auto; }
+  /* Foto en espejo: así el panadero queda a la vista, mirando hacia el tique */
+  .hero-foto { transform: scaleX(-1); }
+  .hero-foto img { object-position: 50% 40%; }
+  .tique-hero { width: min(47rem, 54vw); }
+  .hero .led { position: absolute; right: 0; bottom: clamp(1rem, 3vw, 2.5rem); margin: 0 var(--margen); }
+}
+@media (min-width: 60rem) and (max-height: 50rem) {
+  .tique-hero { width: min(40rem, 48vw); }
+}
+
+/* El tique sale de la máquina al cargar y el marcador se enciende después */
+@media (prefers-reduced-motion: no-preference) {
+  .tique-hero { animation: sale-tique 1100ms var(--salida) 120ms both; }
+  .hero-foto img { animation: asienta-foto 1500ms var(--salida) both; }
+  .hero .led { animation: enciende 500ms steps(4) 950ms both; }
+  @keyframes sale-tique { from { transform: translateY(-104%); } }
+  @keyframes asienta-foto { from { transform: scale(1.06); } }
+  @keyframes enciende { from { opacity: 0; } }
+}
+
+/* ---------- Secciones ---------- */
+/* Costura perforada: cada banda solapa un poco la anterior y sus agujeros la dejan ver */
+main > section + section, main > .marquee + section, .foot {
+  --c: 0.5rem;
+  position: relative; margin-top: calc(var(--c) * -1);
+  -webkit-mask: radial-gradient(var(--c) at 50% 0, #0000 97%, #000) top / calc(var(--c) * 3) var(--c) repeat-x, linear-gradient(#000 0 0) 0 var(--c) / 100% 100% no-repeat;
+  mask: radial-gradient(var(--c) at 50% 0, #0000 97%, #000) top / calc(var(--c) * 3) var(--c) repeat-x, linear-gradient(#000 0 0) 0 var(--c) / 100% 100% no-repeat;
+}
+.foot { padding-top: calc(1.5rem + var(--c)); }
+
+.seccion { padding: clamp(3.5rem, 9vw, 7.5rem) var(--margen); }
+.seccion > * { max-width: var(--max); margin-inline: auto; }
+.titular { font-size: clamp(2.5rem, 7.2vw, 6rem); }
+
+/* Lo que sale del horno: un rollo de tiques */
+.breads { background: var(--harina-oscura); }
+.section-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 1.5rem 3rem; margin-bottom: clamp(2rem, 5vw, 3.5rem); }
+.section-head p { max-width: 40rem; text-wrap: balance; font-size: 1.25rem; line-height: 1.35; font-weight: 600; }
+
+.bread-list { list-style: none; padding: 0; display: grid; gap: 1rem; }
+.bread-list li {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; background: var(--papel);
+  transition: transform 300ms var(--salida);
+}
+.bread-list li > img { grid-column: 1 / -1; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+.bread-info { padding: 1.25rem 1.5rem; min-width: 0; }
+.bread-info h3 { font-size: clamp(1.45rem, 3vw, 2.25rem); margin-bottom: 0.5rem; }
+.price {
+  display: flex; flex-direction: column; justify-content: center; align-items: flex-end; gap: 0.1rem; text-align: right;
+  padding: 1rem 1.5rem 1rem 1.1rem; border-left: 3px dashed var(--tinta);
+  font: 400 clamp(1.5rem, 5.2vw, 3.75rem)/1 var(--rotulo); font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.price small { font: 700 1rem var(--texto); }
+@media (min-width: 48rem) {
+  .bread-list li:has(> img) { grid-template-columns: clamp(12rem, 24vw, 20rem) minmax(0, 1fr) auto; }
+  .bread-list li > img { grid-column: auto; height: 100%; aspect-ratio: auto; min-height: 11rem; }
+  .bread-list li:has(> img):nth-child(odd) { margin-right: clamp(0rem, 7vw, 7rem); }
+  .bread-list li:has(> img):nth-child(even) { margin-left: clamp(0rem, 7vw, 7rem); }
+  .bread-info { align-self: center; padding: 1.5rem 2rem; }
+  .price { padding-inline: 2rem; }
+}
+@media (hover: hover) and (pointer: fine) { .bread-list li:hover { transform: translateY(-4px) rotate(-0.4deg); } }
+
+@media (max-width: 30rem) {
+  .bread-list li { grid-template-columns: minmax(0, 1fr); }
+  .bread-list .price { flex-direction: row; justify-content: flex-start; align-items: baseline; gap: 0.5rem; padding: 0.7rem 1.5rem; border-left: 0; border-top: 3px dashed var(--tinta); font-size: 2rem; }
+}
+
+/* Nosotros */
+.about { display: grid; background: var(--papel); }
+.about-foto { margin: 0; }
+.about-foto img { width: 100%; height: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+.about-cuerpo { padding: clamp(2.5rem, 6vw, 5.5rem) var(--margen); align-self: center; }
+.about-quote p { color: var(--corteza); font: 400 clamp(1.75rem, 3.6vw, 3.25rem)/1.12 var(--rotulo); }
+.about-quote span { display: block; margin-top: 1rem; font-weight: 700; }
+.about-text { margin-top: clamp(2.5rem, 5vw, 4rem); max-width: 36rem; }
+.about-text h2 { font-size: clamp(1.5rem, 2.6vw, 2.1rem); margin-bottom: 0.9rem; }
+.about-text p + p { margin-top: 0.9rem; }
+@media (min-width: 60rem) { .about { grid-template-columns: 5fr 7fr; } .about-foto img { aspect-ratio: auto; } }
+
+/* Horario: un tablero LED */
+.visit { background: var(--tinta); color: var(--papel); }
+.visit .titular { color: var(--harina-oscura); margin-bottom: clamp(2rem, 5vw, 3.5rem); }
+.visit :focus-visible { outline-color: var(--harina-oscura); }
+.visit-grid { display: grid; gap: clamp(2.5rem, 6vw, 5rem); }
+@media (min-width: 60rem) { .visit-grid { grid-template-columns: 3fr 2fr; } }
+.visit h3 { font-size: 1.35rem; margin-bottom: 1rem; }
+.hours { margin: 0; }
+.hours > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.25rem 1rem; padding: 0.8rem 0.9rem; border-top: 1px solid #4d3b2e; }
+.hours > div:last-child { border-bottom: 1px solid #4d3b2e; }
+.hours dt { font-weight: 700; font-size: 1.15rem; }
+.hours dd { margin: 0; display: grid; justify-items: end; color: var(--led); font: 800 clamp(1.4rem, 3.2vw, 2.2rem)/1.15 var(--matriz); font-variant-numeric: tabular-nums; text-transform: uppercase; text-align: right; }
+.hours .es-hoy { background: #46301f; }
+.hours .es-hoy dt::after { content: "Hoy"; margin-left: 0.6em; padding: 0.05em 0.45em; background: var(--led); color: var(--tinta); font-size: 0.85em; }
+.hours .es-hoy dd { text-shadow: 0 0 0.35em rgb(255 169 77 / 0.6); }
+.visit address { font: 400 clamp(1.6rem, 3vw, 2.4rem)/1.2 var(--rotulo); margin-bottom: 1.5rem; }
+
+/* Cierre */
+.contact { background: var(--harina); }
+.contact h2 { font-size: clamp(2.6rem, 8.4vw, 7.25rem); line-height: 1; }
+.contact > p { margin-top: 1.5rem; font-size: 1.3rem; line-height: 1.4; }
+.contact > p:not(.contact-mail) { max-width: var(--max); }
+.contact-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
+.contact .contact-mail { margin-top: 1.5rem; font-size: 1.125rem; }
+
+/* Pie */
+.foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem 2rem; padding: 1.5rem var(--margen); background: var(--tinta); color: var(--papel); font-size: 1rem; }
+.foot :focus-visible { outline-color: var(--harina-oscura); }
+.foot-demo { flex-basis: 100%; }
+
+/* Páginas legales y 404: un tique de papel sobre la harina */
+.legal { max-width: 46rem; margin: clamp(1.5rem, 5vw, 4rem) auto; padding: clamp(1.75rem, 5vw, 3.5rem); background: var(--papel); width: calc(100% - 2 * var(--margen)); }
+.legal h1 { font-size: clamp(2rem, 6vw, 3.25rem); margin-bottom: 1.5rem; }
+.legal h2 { font: 700 1.35rem/1.25 var(--texto); margin: 2.25rem 0 0.6rem; }
+.legal p + p { margin-top: 0.75rem; }
+.legal .back { display: inline-block; margin-bottom: 1.75rem; font-weight: 700; }
+
+/* ---------- Web de varias páginas ---------- */
+main > section:not(.hero, .about, .page-hero) { padding: clamp(3.5rem, 9vw, 7.5rem) var(--margen); }
+main > section:not(.hero, .about, .page-hero) > * { max-width: var(--max); margin-inline: auto; }
+.section-head h2 { font-size: clamp(2.5rem, 7.2vw, 6rem); }
+
+.top .nav-main a[aria-current="page"] { color: var(--harina-oscura); text-decoration: underline; text-underline-offset: 0.45em; }
+@media (max-width: 60rem) {
+  /* En móvil el menú baja a varias filas, todo a la vista, y la barra no se queda fija */
+  :root { --barra: 0rem; }
+  .top { position: static; flex-wrap: wrap; }
+  .top .nav-main { order: 3; flex-basis: 100%; flex-wrap: wrap; gap: 0 1.1rem; }
+  .top nav.nav-main a:not(.nav-cta) { display: inline-block; white-space: nowrap; }
+  /* Con el menú en varias filas, el marcador va justo bajo el tique para que se vea sin bajar */
+  .hero { min-height: 0; padding-bottom: 9rem; }
+  .hero .led { margin: 1rem var(--margen) 0; }
+}
+
+/* Cabecera de página interior: el mismo tique sobre una foto, más bajo */
+.page-hero { position: relative; overflow: clip; padding-bottom: 15rem; }
+.page-hero .hero-foto { height: 18rem; }
+.tique-interior h1 { font-size: clamp(2rem, 7.4cqi, 4.5rem); line-height: 1.04; }
+@media (min-width: 60rem) {
+  .page-hero { min-height: 30rem; padding-bottom: 3rem; }
+  .page-hero .hero-foto { inset: 0 0 0 42%; height: auto; transform: none; }
+  .page-hero .hero-foto img { object-position: 50% 50%; }
+  .tique-interior { width: min(46rem, 54vw); }
+}
+.post-meta { margin-top: 0.9rem; font-weight: 700; }
+
+.more { margin-top: 2rem; }
+.more:not(.btn) { display: inline-flex; padding-block: 0.5rem; }
+.flecha-atras { flex-direction: row-reverse; }
+.flecha-atras::after { transform: scaleX(-1); }
+@media (hover: hover) and (pointer: fine) { .flecha-atras:hover::after { transform: translateX(-4px) scaleX(-1); } }
+
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* Colores de rollo por sección */
+.section-alt { background: var(--harina-oscura); }
+.seccion-tinta { background: var(--tinta); color: var(--papel); }
+.seccion-tinta .section-head h2 { color: var(--harina-oscura); }
+.seccion-tinta :focus-visible { outline-color: var(--harina-oscura); }
+
+/* Catálogo */
+.group + .group { margin-top: clamp(3.5rem, 8vw, 6rem); }
+.group > h2 { font-size: clamp(2rem, 5.4vw, 4rem); margin-bottom: 0.6rem; }
+.group > p { max-width: 36rem; margin-bottom: 1.75rem; font-size: 1.2rem; font-weight: 600; line-height: 1.35; }
+.group .bread-list { grid-template-columns: repeat(auto-fit, minmax(min(28rem, 100%), 1fr)); }
+.group .bread-info h3 { font-size: clamp(1.3rem, 2.2vw, 1.7rem); }
+@media (min-width: 48rem) {
+  .group .bread-list li { grid-template-columns: minmax(0, 1fr) 11rem; }
+  .group .price { font-size: clamp(1.2rem, 1.9vw, 1.5rem); padding-inline: 0.75rem; align-items: center; text-align: center; }
+  .group .bread-list li:last-child:nth-child(odd) { grid-column: 1 / -1; }
+}
+
+/* Banda con texto y foto */
+.con-foto { display: grid; gap: 2rem; align-items: center; }
+.con-foto img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+@media (min-width: 60rem) { .con-foto { grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 5rem); } }
+
+.cabecera-grupo { margin-bottom: 1.75rem; }
+.cabecera-grupo h2 { font-size: clamp(2rem, 5.4vw, 4rem); margin-bottom: 0.6rem; }
+.cabecera-grupo p { font-size: 1.2rem; font-weight: 600; line-height: 1.35; text-wrap: balance; }
+
+/* Texto largo: papel para leer con calma */
+.prose { max-width: 46rem !important; padding: clamp(1.75rem, 5vw, 3.5rem); background: var(--papel); font-size: 1.2rem; line-height: 1.6; }
+.prose p + p, .prose ul + p, .prose p + ul { margin-top: 1.1rem; }
+.prose h2 { font-size: clamp(1.5rem, 3.4vw, 2.25rem); margin: 2.75rem 0 0.9rem; }
+.prose h2:first-child { margin-top: 0; }
+.prose ul { padding-left: 1.25rem; }
+.prose li + li { margin-top: 0.5rem; }
+
+/* Horario y contacto */
+.visit > .led { display: inline-grid; margin-inline: 0; margin-bottom: 2.5rem; box-shadow: inset 0 0 0 2px #4d3b2e; }
+.visit .visit-grid h2 { font-size: clamp(1.6rem, 3vw, 2.25rem); color: var(--harina-oscura); margin-bottom: 1.25rem; }
+.visit .visit-grid h2.sub { margin-top: 2.75rem; }
+.visit .visit-grid p + p { margin-top: 0.5rem; }
+.link-contacto { font-size: 1.3rem; font-weight: 700; }
+
+/* Mapa con consentimiento: no se conecta a OpenStreetMap hasta que se pulsa */
+.map { display: grid; place-items: center; align-content: center; gap: 1.25rem; aspect-ratio: 4 / 3; padding: 1.5rem; text-align: center; background: #3a2a1e; }
+.map p { max-width: 26rem; }
+.map iframe { width: 100%; height: 100%; border: 0; }
+.map.is-loaded { padding: 0; }
+.map-links { margin-top: 0.75rem; }
+.map-links a { padding-block: 0.5rem; }
+
+/* Pie completo */
+.foot-full { display: block; padding: clamp(3rem, 7vw, 4.5rem) var(--margen) 1.5rem; }
+.foot-grid { max-width: var(--max); margin: 0 auto; display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(min(13rem, 100%), 1fr)); }
+.foot-grid h2 { font: 700 1rem var(--texto); color: var(--harina-oscura); margin-bottom: 0.5rem; }
+.foot-logo { font: 400 1.6rem var(--rotulo); color: var(--harina-oscura); margin-bottom: 0.5rem; }
+.foot-full p { line-height: 1.75; }
+.foot-legal, .foot-full .foot-demo { max-width: var(--max); margin-inline: auto; }
+.foot-legal { margin-top: 2.5rem; padding-top: 1.25rem; border-top: 1px solid #4d3b2e; }
+.foot-full .foot-demo { margin-top: 0.25rem; }
+
+/* ---------- Movimiento (plan Estándar) ---------- */
+/* Los tiques salen del rollo al llegar a ellos; solo si el sistema no pide reducir animación
+   (la clase .anim la pone js/animaciones.js). */
+.anim :is(.bread-list li, .section-head, .about-cuerpo, .about-foto, .group > h2, .group > p, .group > .con-foto, .prose, .visit-grid > *, .contact > *):not(.is-visible) { opacity: 0; }
+.anim .bread-list li.is-visible { animation: sale-fila 800ms var(--salida) var(--retraso, 0ms) backwards; }
+.anim :is(.section-head, .about-cuerpo, .about-foto, .group > h2, .group > p, .group > .con-foto, .prose, .visit-grid > *, .contact > *).is-visible { animation: sube 700ms var(--salida) var(--retraso, 0ms) backwards; }
+@keyframes sale-fila { from { opacity: 0; clip-path: inset(0 0 100% 0); transform: translateY(-1.75rem); } to { clip-path: inset(0 0 0 0); } }
+@keyframes sube { from { opacity: 0; transform: translateY(1.25rem); } }
+
+/* Transición entre páginas; la barra se queda quieta */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+  .top { view-transition-name: cabecera; }
+  ::view-transition-old(root) { animation: 160ms ease-out both vt-salida; }
+  ::view-transition-new(root) { animation: 320ms var(--salida) both vt-entrada; }
+  @keyframes vt-salida { to { opacity: 0; } }
+  @keyframes vt-entrada { from { opacity: 0; transform: translateY(0.6rem); } }
+}
+
+/* ---------- Pasos, blog, formulario y cookies (plan Avanzado) ---------- */
+.steps { list-style: none; padding: 0; display: grid; gap: 2rem; grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr)); counter-reset: paso; }
+.steps li { counter-increment: paso; }
+.steps li::before { content: counter(paso); display: block; font: 400 clamp(4.5rem, 10vw, 7.5rem)/1 var(--rotulo); }
+.steps h3 { font-size: clamp(1.5rem, 2.8vw, 2.1rem); margin-block: 0.5rem; }
+
+.posts { list-style: none; padding: 0; }
+.posts li { display: grid; gap: 1rem 2rem; align-items: center; padding: 1.75rem 0; border-top: 3px dashed var(--tinta); transition: transform 300ms var(--salida); }
+.posts li:last-child { border-bottom: 3px dashed var(--tinta); }
+.posts img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; }
+.posts time { display: block; margin-top: 0.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+@media (min-width: 40rem) { .posts li { grid-template-columns: clamp(10rem, 22vw, 18rem) minmax(0, 1fr); } }
+.posts h3 { font-size: clamp(1.5rem, 3.2vw, 2.4rem); margin-block: 0.4rem 0.6rem; }
+.posts h3 a { text-decoration: none; }
+.posts p { max-width: 42rem; }
+@media (hover: hover) and (pointer: fine) {
+  .posts li:hover { transform: translateX(0.5rem); }
+  .posts h3 a:hover { text-decoration: underline; }
+}
+
+/* Encargo: a la izquierda el formulario, a la derecha el tique que se imprime */
+.encargo-grid { display: grid; gap: clamp(2.5rem, 6vw, 5rem); align-items: start; }
+@media (min-width: 60rem) { .encargo-grid { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); } .impresion { position: sticky; top: calc(var(--barra) + 1.5rem); } }
+.order { display: grid; gap: 1.5rem; }
+.field { display: grid; gap: 0.4rem; }
+.field label { font-weight: 700; font-size: 1.2rem; }
+.hint { font-size: 1.05rem; line-height: 1.4; }
+.field input, .field textarea { width: 100%; min-height: 3.25rem; padding: 0.75rem 0.9rem; font: inherit; color: var(--tinta); background: var(--papel); border: 2px solid var(--tinta); border-radius: 0; }
+.field textarea { min-height: 8rem; resize: vertical; }
+.field [aria-invalid="true"] { border-color: #7d0f04; border-width: 4px; }
+.error { color: #7d0f04; font-weight: 700; }
+.error:empty { display: none; }
+.form-status { padding: 1rem 1.2rem; background: var(--papel); font-weight: 600; }
+.form-status:empty { display: none; }
+.order .btn { justify-self: start; }
+
+.impresion::before { content: ""; display: block; height: 0.9rem; background: var(--tinta); margin-inline: -0.5rem; position: relative; z-index: 1; }
+.impreso { background: var(--papel); padding: 1.5rem 1.75rem 1.75rem; filter: none; }
+.impreso-cab { font: 400 1.5rem/1.1 var(--rotulo); padding-bottom: 1rem; border-bottom: 3px dashed var(--tinta); }
+.impreso-fila { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 500ms var(--salida); }
+.impreso-fila > div { overflow: hidden; min-height: 0; }
+.impreso-fila.tiene { grid-template-rows: 1fr; }
+.impreso-fila span { display: block; padding-top: 1rem; font-weight: 700; font-size: 1rem; }
+.impreso-fila p { font: 400 1.25rem/1.25 var(--rotulo); white-space: pre-line; overflow-wrap: anywhere; }
+.impreso-vacio { padding-top: 1rem; }
+.impreso.tiene-algo .impreso-vacio { display: none; }
+
+/* Aviso de cookies: Aceptar y Rechazar con el mismo peso visual */
+.consent { position: fixed; inset: auto 1rem 1rem; z-index: 30; max-width: 34rem; margin-left: auto; display: grid; gap: 1rem; padding: 1.25rem 1.5rem; background: var(--tinta); color: var(--papel); box-shadow: 0 14px 32px -8px rgb(43 29 20 / 0.6); }
+.consent[hidden] { display: none; }
+.consent :focus-visible { outline-color: var(--harina-oscura); }
+.consent-actions { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.consent .btn { --fondo-btn: var(--harina-oscura); --color-btn: var(--tinta); flex: 1 1 8rem; min-height: 3rem; }
+.link-button { padding: 0; border: 0; background: none; font: inherit; color: inherit; text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer; }
+
+/* ---------- Movimiento extra (plan Avanzado) ---------- */
+/* Cinta LED en movimiento, con botón para pararla (criterio 2.2.2 de WCAG) */
+.marquee { position: relative; overflow: hidden; background: var(--tinta); color: var(--led); padding: 0.85rem 0; }
+.marquee-track { display: flex; width: max-content; animation: cinta 45s linear infinite; font: 800 clamp(1.4rem, 2.7vw, 2.1rem)/1.1 var(--matriz); text-transform: uppercase; text-shadow: 0 0 0.35em rgb(255 169 77 / 0.55); }
+.marquee-track span { display: inline-flex; align-items: center; gap: 2.5rem; padding-left: 2.5rem; white-space: nowrap; }
+.marquee-track span::after { content: ""; width: 0.4em; height: 0.4em; border-radius: 50%; background: currentColor; }
+.marquee.is-pausada .marquee-track { animation-play-state: paused; }
+@keyframes cinta { to { transform: translateX(-50%); } }
+.cinta-pausa { position: absolute; right: 0; top: 0; bottom: 0; padding-inline: 1.25rem; border: 0; background: var(--harina-oscura); color: var(--tinta); font: 700 1rem var(--texto); cursor: pointer; }
+.cinta-pausa:focus-visible { outline-color: var(--papel); outline-offset: -5px; }
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Parallax de la foto: se usa la propiedad translate para no pisar el espejo ni la entrada */
+  @supports (animation-timeline: scroll()) {
+    .hero-foto { animation: parallax linear both; animation-timeline: scroll(root); animation-range: 0 100vh; }
+    @keyframes parallax { to { translate: 0 10%; } }
+  }
+
+  /* El número de cada paso cae como un sello */
+  .anim .steps li:not(.is-visible) { opacity: 0; }
+  .anim .steps li.is-visible::before { animation: sello 520ms var(--salida) calc(var(--retraso, 0ms) + 120ms) backwards; }
+  .anim .steps li.is-visible { animation: sube 500ms var(--salida) var(--retraso, 0ms) backwards; }
+  @keyframes sello { from { opacity: 0; transform: scale(1.7) rotate(-6deg); } }
+
+  .anim .posts li:not(.is-visible), .anim .order:not(.is-visible), .anim .impresion:not(.is-visible) { opacity: 0; }
+  .anim .posts li.is-visible { animation: sube 600ms var(--salida) var(--retraso, 0ms) backwards; }
+  .anim .order.is-visible { animation: sube 600ms var(--salida) backwards; }
+  .anim .impresion.is-visible .impreso { animation: sale-tique 900ms var(--salida) 150ms backwards; }
+
+  /* El resguardo del precio se despega un poco al pasar el ratón */
+  @media (hover: hover) and (pointer: fine) {
+    .price { transition: transform 300ms var(--salida); transform-origin: 0 100%; }
+    .bread-list li:hover .price { transform: rotate(2deg) translateY(-2px); }
+  }
+
+  /* Error: sacudida corta. Mensaje final: entra suave. Cookies: sale como un tique. */
+  .field [aria-invalid="true"] { animation: sacudida 320ms var(--salida); }
+  @keyframes sacudida { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+  .form-status:not(:empty) { animation: sube 350ms var(--salida); }
+  .consent { animation: sube 500ms var(--salida) 600ms backwards; }
+
+  /* El logo se comparte en la transición entre páginas */
+  .logo { view-transition-name: logo; }
+}
+@media (prefers-reduced-motion: reduce) {
+  /* Con movimiento reducido, la cinta queda quieta y sin repetir los textos */
+  .marquee-track { animation: none; width: auto; flex-wrap: wrap; row-gap: 0.4rem; }
+  .marquee-track span:nth-child(n + 6) { display: none; }
+}
+
+/* ---------- Funciones del plan Estándar ---------- */
+/* Panel «Hoy en el horno» */
+.hoy-lista { display: grid; gap: 0 clamp(2rem, 5vw, 4rem); }
+.hoy-lista > div:last-child { border-bottom: 1px solid #4d3b2e; }
+@media (min-width: 60rem) { .hoy-lista { grid-template-columns: 1fr 1fr; } }
+.hoy-lista .es-hoy dt::after { content: "Solo algunos días"; }
+.hoy-pie { margin-top: 1.5rem; }
+[data-hoy-nota]:empty { display: none; }
+.hoy-pie a { padding-block: 0.5rem; }
+
+/* Cómo se hacen 48 horas: una línea de tiempo que se recorre */
+.proceso-lista { position: relative; list-style: none; padding: 0; display: grid; gap: 2.25rem; }
+.proceso-lista li { position: relative; padding-left: 1.5rem; border-left: 3px dashed var(--harina-oscura); }
+.proceso-hora { display: block; color: var(--led); font: 800 clamp(2.25rem, 3.6vw, 3.25rem)/1 var(--matriz); text-transform: uppercase; }
+.proceso-lista h3 { font-size: clamp(1.4rem, 2.4vw, 1.9rem); margin-block: 0.6rem 0.5rem; color: var(--harina-oscura); }
+@media (min-width: 60rem) {
+  .proceso-lista { grid-template-columns: repeat(4, 1fr); gap: clamp(1.5rem, 3vw, 3rem); }
+  .proceso-lista li { padding: 1.5rem 0 0; border-left: 0; border-top: 3px dashed var(--harina-oscura); }
+}
+
+/* Pedir un producto desde su propio resguardo */
+.pedir { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--acento); font: 700 1.05rem var(--texto); white-space: nowrap; text-decoration: underline; text-underline-offset: 0.2em; }
+@media (hover: hover) and (pointer: fine) { .pedir:hover { color: var(--tinta); } }
+.bread-list .price { gap: 0; }
+@media (max-width: 30rem) { .bread-list .pedir { margin-left: auto; } }
+
+/* Filtros del catálogo */
+.filtros { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem; }
+.filtros[hidden] { display: none; }
+.filtros button { min-height: 2.75rem; padding: 0.4rem 1.1rem; border: 2px solid var(--tinta); background: var(--papel); color: var(--tinta); font: 700 1.05rem var(--texto); cursor: pointer; transition: background-color 160ms ease, color 160ms ease; }
+.filtros button[aria-pressed="true"] { background: var(--tinta); color: var(--harina); }
+@media (hover: hover) and (pointer: fine) { .filtros button:not([aria-pressed="true"]):hover { background: var(--harina); } }
+.filtros-estado { min-height: 1.6em; margin-bottom: 1.5rem; font-weight: 700; }
+.bread-list li[hidden], .group[hidden] { display: none; }
+.sello-hoy { display: inline-block; padding: 0.1em 0.5em; background: var(--tinta); color: var(--led); font: 700 0.95rem/1.3 var(--texto); vertical-align: 0.15em; }
+
+/* Barra fija en el móvil: llamar, pedir y llegar, siempre a un toque */
+.barra-accion { display: none; }
+@media (max-width: 60rem) {
+  /* El pie deja sitio para que la barra no tape su última línea */
+  body:has(.barra-accion) .foot-full { padding-bottom: calc(5.75rem + env(safe-area-inset-bottom)); }
+  .barra-accion {
+    position: fixed; inset: auto 0 0; z-index: 25; display: grid; grid-template-columns: 1fr 1.35fr 1fr;
+    padding-bottom: env(safe-area-inset-bottom); background: var(--tinta); box-shadow: 0 -8px 20px -10px rgb(43 29 20 / 0.6);
+  }
+  .barra-accion a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.1rem; min-height: 4.25rem; color: var(--harina); font: 700 0.95rem/1.15 var(--texto); text-decoration: none; }
+  .barra-accion a.principal { background: var(--acento); }
+  .barra-accion svg { width: 1.4rem; height: 1.4rem; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .barra-accion a:focus-visible { outline-color: var(--harina); outline-offset: -5px; }
+  .consent { bottom: calc(5.25rem + env(safe-area-inset-bottom)); }
+}
+
+/* Preguntas frecuentes */
+.faq { display: grid; gap: 0.75rem; max-width: 52rem !important; }
+.faq details { background: var(--papel); }
+.faq summary { display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 3.5rem; padding: 1rem 1.75rem; font: 400 clamp(1.15rem, 2.2vw, 1.4rem)/1.2 var(--rotulo); cursor: pointer; list-style: none; }
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after { content: ""; flex: none; width: 1rem; height: 1rem; background: linear-gradient(currentColor 0 0) center / 100% 3px no-repeat, linear-gradient(currentColor 0 0) center / 3px 100% no-repeat; transition: transform 300ms var(--salida); }
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq summary:focus-visible { outline-offset: -5px; }
+.faq details > div { padding: 0 1.75rem 1.5rem; }
+.faq details a { font-weight: 700; }
+
+/* Las piezas nuevas también salen al bajar */
+.anim :is(.proceso-lista li, .faq details):not(.is-visible) { opacity: 0; }
+.anim :is(.proceso-lista li, .faq details).is-visible { animation: sube 650ms var(--salida) var(--retraso, 0ms) backwards; }
+
+/* ---------- Funciones del plan Avanzado ---------- */
+/* Carta del encargo: elegir con + y − */
+.carta { margin: 0; padding: 0; border: 0; min-width: 0; }
+.carta[hidden] { display: none; }
+.carta legend { padding: 0; font: 400 clamp(1.6rem, 3.4vw, 2.5rem)/1.1 var(--rotulo); }
+.carta h2 { margin-block: 1.5rem 0.5rem; font: 700 1.2rem var(--texto); }
+.carta-lista { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+.carta-lista li { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.25rem 1rem; padding: 0.6rem 1.25rem; background: var(--papel); }
+.carta-nombre { font-weight: 700; }
+.carta-precio { display: block; font-weight: 400; font-variant-numeric: tabular-nums; }
+.carta-aviso { grid-column: 1 / -1; color: #7d0f04; font-weight: 700; }
+.carta-aviso:empty { display: none; }
+.pasos { display: inline-flex; align-items: center; }
+.pasos button { width: 2.75rem; height: 2.75rem; border: 2px solid var(--tinta); background: var(--papel); color: var(--tinta); font: 400 1.4rem/1 var(--rotulo); cursor: pointer; transition: background-color 160ms ease, color 160ms ease; }
+.pasos button:disabled { opacity: 0.4; cursor: default; }
+@media (hover: hover) and (pointer: fine) { .pasos button:not(:disabled):hover { background: var(--tinta); color: var(--harina); } }
+.pasos output { min-width: 2.25rem; text-align: center; font: 400 1.3rem var(--rotulo); font-variant-numeric: tabular-nums; }
+.carta-total { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-top: 1rem; font-weight: 700; }
+.carta-total b { font: 400 clamp(1.5rem, 3vw, 2.25rem) var(--rotulo); font-variant-numeric: tabular-nums; }
+.carta-total:empty { display: none; }
+.carta .error { margin-top: 0.5rem; }
+
+/* Líneas del tique impreso */
+.impreso-lineas { list-style: none; padding: 0; margin: 0; }
+.impreso-lineas li { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding-top: 0.8rem; font-weight: 700; }
+.impreso-lineas b { font: 400 1.15rem var(--rotulo); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.impreso-total { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-top: 1rem; padding-top: 0.8rem; border-top: 3px dashed var(--tinta); font-weight: 700; }
+.impreso-total[hidden] { display: none; }
+.impreso-total b { font: 400 1.75rem var(--rotulo); color: var(--acento); font-variant-numeric: tabular-nums; }
+@media (prefers-reduced-motion: no-preference) {
+  .impreso-lineas li { animation: sale-fila 420ms var(--salida); }
+  /* Cómo se hacen 48 horas: la línea se va llenando al bajar */
+  @supports (animation-timeline: view()) {
+    .proceso-lista::before { content: ""; position: absolute; z-index: 1; background: var(--led); }
+    @media (min-width: 60rem) {
+      .proceso-lista::before { inset: 0 0 auto; height: 3px; transform-origin: left; animation: llena-ancho linear both; animation-timeline: view(); animation-range: entry 30% cover 60%; }
+      @keyframes llena-ancho { from { transform: scaleX(0); } }
+    }
+    @media (max-width: 60rem) {
+      .proceso-lista::before { inset: 0 auto 0 0; width: 3px; transform-origin: top; animation: llena-alto linear both; animation-timeline: view(); animation-range: entry 20% cover 80%; }
+      @keyframes llena-alto { from { transform: scaleY(0); } }
+    }
+  }
+}
+
+
+/* Historia: dos fechas a tamaño de cartel */
+.fechas { list-style: none; padding: 0; margin: 0 auto 2.5rem; display: grid; gap: 1rem; max-width: 46rem !important; }
+@media (min-width: 40rem) { .fechas { grid-template-columns: 1fr 1fr; } }
+.fechas li { padding: 1.5rem 1.75rem; background: var(--harina-oscura); }
+.fechas b { display: block; font: 400 clamp(3rem, 7vw, 4.5rem)/1 var(--rotulo); color: var(--acento); margin-bottom: 0.5rem; }
+
+/* Final de artículo */
+.fin-articulo { display: grid; gap: 1.5rem; max-width: 46rem !important; margin-top: 1rem; padding: clamp(1.5rem, 4vw, 2.5rem); background: var(--harina-oscura); }
+.fin-articulo h2 { font-size: clamp(1.5rem, 3vw, 2.1rem); margin-bottom: 0.5rem; }
+.compartir { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+.compartir-estado { font-weight: 700; }
+.relacionado a { font-weight: 700; padding-block: 0.5rem; }
+.anim :is(.fechas li, .fin-articulo):not(.is-visible) { opacity: 0; }
+.anim :is(.fechas li, .fin-articulo).is-visible { animation: sube 600ms var(--salida) var(--retraso, 0ms) backwards; }
+
+/* Resumen fijo del encargo en el móvil */
+.resumen-movil { display: none; }
+.aviso-sin-js { margin-bottom: 1.5rem; padding: 1rem 1.25rem; background: var(--papel); font-weight: 600; }
+@media (max-width: 60rem) {
+  .resumen-movil:not([hidden]) { position: fixed; inset: auto 0 0; z-index: 25; display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.5rem var(--margen) calc(0.5rem + env(safe-area-inset-bottom)); background: var(--tinta); color: var(--harina); font-weight: 700; }
+  .resumen-movil a { display: inline-flex; align-items: center; min-height: 2.75rem; padding-inline: 1rem; background: var(--acento); color: var(--harina); text-decoration: none; white-space: nowrap; }
+  .resumen-movil a:focus-visible { outline-color: var(--harina); outline-offset: -5px; }
+  body.con-resumen .foot-full { padding-bottom: calc(5.75rem + env(safe-area-inset-bottom)); }
+  #tique { scroll-margin-top: 1rem; }
+}
+
+/* ---------- Extras: aviso, galería, reservas, estadísticas y cartel ---------- */
+/* Aviso del negocio: arriba del todo, editable en js/avisos.js */
+.aviso-negocio { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 0.25rem 1.5rem; padding: 0.5rem var(--margen); background: var(--acento); color: var(--harina); font-weight: 600; }
+.aviso-negocio a { color: inherit; font-weight: 700; }
+.aviso-negocio button { min-height: 2.75rem; padding-inline: 0.75rem; border: 0; background: none; color: inherit; font: 700 1rem var(--texto); text-decoration: underline; text-underline-offset: 0.2em; cursor: pointer; }
+.aviso-negocio :focus-visible { outline-color: var(--harina); }
+
+/* Galería */
+.galeria { list-style: none; padding: 0; display: grid; gap: 0.75rem; }
+@media (min-width: 48rem) { .galeria { grid-template-columns: repeat(3, 1fr); } }
+.galeria a { display: block; overflow: hidden; }
+.galeria img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; transition: transform 400ms var(--salida); }
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) { .galeria a:hover img { transform: scale(1.04); } }
+.visor { width: min(70rem, 94vw); max-height: 94vh; padding: 1rem; border: 0; background: var(--tinta); color: var(--harina); }
+.visor::backdrop { background: rgb(43 29 20 / 0.85); }
+.visor figure { margin: 0; }
+.visor img { width: 100%; max-height: 72vh; object-fit: contain; }
+.visor figcaption { margin-top: 0.75rem; }
+.visor-botones { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+.visor :focus-visible { outline-color: var(--harina); }
+.visor .btn { flex: 1 1 7rem; min-height: 3rem; }
+
+/* Reservas */
+.reservas { max-width: 40rem !important; padding: clamp(1.5rem, 4vw, 3rem); background: var(--papel); }
+.reservas h2 { font-size: clamp(1.75rem, 4vw, 2.75rem); margin-bottom: 1rem; }
+.reservas .btn { margin-top: 1.25rem; }
+.reservas-nota { margin-top: 1.25rem; }
+.reservas select { width: 100%; min-height: 3.25rem; padding: 0.6rem 0.9rem; font: inherit; color: var(--tinta); background: var(--papel); border: 2px solid var(--tinta); border-radius: 0; }
+.horas { margin: 0; padding: 0; border: 0; }
+.horas legend { padding: 0; font-weight: 700; font-size: 1.2rem; }
+.horas > div { display: flex; flex-wrap: wrap; gap: 0 1.5rem; }
+.opcion { display: flex; align-items: center; gap: 0.7rem; min-height: 2.75rem; }
+.opcion input { width: 1.4rem; height: 1.4rem; flex: none; }
+
+/* Estadísticas de ejemplo */
+.tabla-visitas { width: 100%; border-collapse: collapse; margin-block: 1rem 1.5rem; font-variant-numeric: tabular-nums; }
+.tabla-visitas caption { text-align: left; font-weight: 700; margin-bottom: 0.5rem; }
+.tabla-visitas th, .tabla-visitas td { padding: 0.6rem 0.25rem; text-align: left; border-bottom: 1px solid var(--tinta); }
+.tabla-visitas td:last-child, .tabla-visitas th:last-child { text-align: right; }
+
+/* Cartel para imprimir */
+.cartel { max-width: 28rem !important; padding: 2.5rem 2rem; background: var(--papel); text-align: center; }
+.cartel-titulo { font: 400 clamp(1.75rem, 5vw, 2.5rem)/1.08 var(--rotulo); margin-bottom: 1.25rem; }
+.cartel img { width: min(100%, 17.5rem); height: auto; margin-inline: auto; }
+.cartel-texto { margin-top: 1.25rem; font-size: 1.2rem; line-height: 1.35; font-weight: 600; }
+.cartel-marca { margin-top: 1.25rem; padding-top: 1rem; border-top: 3px dashed var(--tinta); font-weight: 700; }
+.cartel-accion { margin-top: 1.5rem; text-align: center; }
+@media print {
+  body > *:not(main), .page-hero, .cartel-accion { display: none !important; }
+  .section-alt { background: none; padding: 0 !important; }
+  .cartel { -webkit-mask: none; mask: none; border: 2px dashed #000; margin-top: 1cm; }
+}
+.anim :is(.galeria li, .reservas):not(.is-visible) { opacity: 0; }
+.anim :is(.galeria li, .reservas).is-visible { animation: sube 550ms var(--salida) var(--retraso, 0ms) backwards; }
+
+/* Los avisos de los formularios dejan sitio a las barras fijas de abajo al hacerse visibles */
+@media (max-width: 60rem) { .form-status { scroll-margin-bottom: 6.5rem; } }
+
+/* Móvil: aviso, menú y marcador más compactos para que el marcador se vea al abrir la portada */
+@media (max-width: 60rem) {
+  .aviso-negocio { flex-wrap: nowrap; gap: 0.75rem; padding-block: 0.35rem; font-size: 1rem; line-height: 1.3; }
+  .aviso-negocio button { flex: none; padding-inline: 0.25rem; }
+  .top nav.nav-main a:not(.nav-cta) { padding-block: 0.3rem; }
+  .hero .led { margin-top: -1.5rem; }
+}
+
+/* Lo marcado como oculto se oculta siempre, aunque otra regla le dé display */
+[hidden] { display: none !important; }
+
+/* Nada se sale de lado: ni la foto mientras se asienta al cargar */
+body { overflow-x: clip; }
+
+/* Móviles muy estrechos: el horario pasa a una columna para que quepa */
+@media (max-width: 22.5rem) {
+  .hours > div { grid-template-columns: minmax(0, 1fr); }
+  .hours dd { justify-items: start; text-align: left; }
+}
+
+/* El correo es una palabra muy larga: que pueda partirse y no ensanche la columna */
+.visit-grid > * { min-width: 0; }
+.visit a, .foot a { overflow-wrap: anywhere; }
